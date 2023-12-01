@@ -1,8 +1,10 @@
 package veiculo;
 
+import estacionamento.DiaDaSemana;
 import estacionamento.Vaga;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 public class Ticket {
     LocalDateTime entrada;
@@ -10,11 +12,19 @@ public class Ticket {
     double valor;
     Vaga vaga;
 
-    public Ticket(LocalDateTime entrada, LocalDateTime saida, double valor, Vaga vaga) {
+    public Ticket(LocalDateTime entrada) {
         this.entrada = entrada;
-        this.saida = saida;
-        this.valor = valor;
-        this.vaga = vaga;
+    }
+
+    public void calcularValor() {
+        float modificador = vaga.getOcupante().getTipoDeVeiculo().getModificador();
+        float horas = ChronoUnit.HOURS.between(entrada, saida);
+        if (ChronoUnit.HOURS.between(entrada, saida) == 0) {
+            horas++;
+        }
+        float valorPorHoraDoDia = DiaDaSemana.getDia(entrada.getDayOfWeek()).getValorPorHora();
+
+        this.setValor(valorPorHoraDoDia * horas * modificador);
     }
 
     public LocalDateTime getEntrada() {
@@ -55,7 +65,6 @@ public class Ticket {
         sb.append("entrada=").append(entrada);
         sb.append(", saida=").append(saida);
         sb.append(", valor=").append(valor);
-        sb.append(", vaga=").append(vaga);
         sb.append('}');
         return sb.toString();
     }

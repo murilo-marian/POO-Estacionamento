@@ -1,5 +1,0 @@
-O programa irá trabalhar com 3 tipos de vaga, caminhão, moto e carro
-O programa salvará os dados em um arquivo json
-O programa terá 4 funções principais, estacionar veículo, remover veículo, gerar relatório e mostrar estado atual do estacionamento
-O programa não usará SQL
-O usuário poderá inserir um modificador de preço por hora dependendo do dia da semana
