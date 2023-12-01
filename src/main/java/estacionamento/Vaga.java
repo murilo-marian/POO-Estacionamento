@@ -22,24 +22,12 @@ public class Vaga {
         return tipo;
     }
 
-    public void setTipo(TipoDeVeiculo tipo) {
-        this.tipo = tipo;
-    }
-
     public int getNumero() {
         return numero;
     }
 
-    public void setNumero(int numero) {
-        this.numero = numero;
-    }
-
     public Veiculo getOcupante() {
         return ocupante;
-    }
-
-    public void setOcupante(Veiculo ocupante) {
-        this.ocupante = ocupante;
     }
 
     @Override

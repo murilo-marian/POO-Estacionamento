@@ -20,17 +20,17 @@ public class Estacionamento {
         for (int i = 1; i <= vagasTotais; i++) {
             Vaga vaga;
             if (i <= vagasCarro) {
-                vaga = new Vaga(TipoDeVeiculo.Carro, i);
+                vaga = new Vaga(TipoDeVeiculo.CARRO, i);
             } else if (i <= vagasCarro + vagasMoto) {
-                vaga = new Vaga(TipoDeVeiculo.Moto, i);
+                vaga = new Vaga(TipoDeVeiculo.MOTO, i);
             } else {
-                vaga = new Vaga(TipoDeVeiculo.Caminhao, i);
+                vaga = new Vaga(TipoDeVeiculo.CAMINHAO, i);
             }
             vagas.add(vaga);
         }
-        TipoDeVeiculo.Carro.setModificador(modificadorCarro);
-        TipoDeVeiculo.Moto.setModificador(modificadorMoto);
-        TipoDeVeiculo.Caminhao.setModificador(modificadorCaminhao);
+        TipoDeVeiculo.CARRO.setModificador(modificadorCarro);
+        TipoDeVeiculo.MOTO.setModificador(modificadorMoto);
+        TipoDeVeiculo.CAMINHAO.setModificador(modificadorCaminhao);
     }
 
     public Estacionamento(String nome, ArrayList<Vaga> vagas, int vagasTotais) {
@@ -67,9 +67,8 @@ public class Estacionamento {
 
     public void setarSaida(Veiculo veiculo) {
         veiculo.getTicket().setSaida(LocalDateTime.now());
-        System.out.println(veiculo.getTicket());
-        veiculo.getTicket().calcularValor();
-        //TODO calcular valor retorna -> setvalor()
+        double valor = veiculo.getTicket().calcularValor();
+        veiculo.getTicket().setValor(valor);
     }
 
     public void retirarVeiculo(Veiculo retirado) {
