@@ -86,8 +86,10 @@ public class Veiculo {
         sb.append("placa='").append(placa).append('\'');
         sb.append(", marca='").append(marca).append('\'');
         sb.append(", modelo='").append(modelo).append('\'');
-        sb.append(", ano=").append(ano);
+        sb.append(", ano='").append(ano).append('\'');
         sb.append(", cor='").append(cor).append('\'');
+        sb.append(", tipoDeVeiculo=").append(tipoDeVeiculo);
+        sb.append(", ticket=").append(ticket);
         sb.append('}');
         return sb.toString();
     }

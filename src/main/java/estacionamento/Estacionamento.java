@@ -39,13 +39,18 @@ public class Estacionamento {
         this.vagasTotais = vagasTotais;
     }
 
-    public void estacionar(Veiculo veiculo) {
+    public void estacionar(Veiculo veiculo) throws Exception {
+        boolean encontrado = false;
         for (Vaga vaga : vagas) {
             if (vaga.tipo == veiculo.getTipoDeVeiculo() && vaga.ocupante == null) {
                 vaga.ocupante = veiculo;
                 vaga.ocupante.getTicket().setVaga(vaga);
+                encontrado = true;
                 break;
             }
+        }
+        if (!encontrado) {
+            throw new Exception("Não há vagas");
         }
     }
 
@@ -62,6 +67,7 @@ public class Estacionamento {
 
     public void setarSaida(Veiculo veiculo) {
         veiculo.getTicket().setSaida(LocalDateTime.now());
+        System.out.println(veiculo.getTicket());
         veiculo.getTicket().calcularValor();
         //TODO calcular valor retorna -> setvalor()
     }

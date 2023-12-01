@@ -2,9 +2,12 @@ import estacionamento.Estacionamento;
 import estacionamento.PersistenciaJSON;
 import estacionamento.TipoDeVeiculo;
 import estacionamento.Vaga;
+import org.json.simple.parser.ParseException;
+import veiculo.Ticket;
 import veiculo.Veiculo;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
@@ -16,32 +19,33 @@ public class Main {
     static Estacionamento estacionamento;
 
     public static void main(String[] args) {
-        System.out.println("Criando novo estacionamento");
-        System.out.print("Nome do estacionamento: ");
-        String nome = entrada.nextLine();
+        estacionamento = PersistenciaJSON.resgatarEstacionamento();
 
-        //TODO fazer um loop pra caso der merda
-        //TODO reiniciar do ponto onde parou
-        //TODO calcular valor retorna -> setvalor()
+        if (estacionamento == null) {
+            System.out.println("Criando novo estacionamento");
+            System.out.print("Nome do estacionamento: ");
+            String nome = entrada.nextLine();
 
-
-        System.out.print("Número de vagas de Carro ");
-        int vagasCarro = entrada.nextInt();
-        System.out.print("Número de vagas de Moto ");
-        int vagasMoto = entrada.nextInt();
-        System.out.print("Número de vagas de Caminhão ");
-        int vagasCaminhao = entrada.nextInt();
+            //TODO fazer um loop pra caso der merda
+            //TODO calcular valor retorna -> setvalor()
 
 
-        estacionamento = new Estacionamento(nome, vagasCarro, 1, vagasMoto, 1, vagasCaminhao, 1);
+            System.out.print("Número de vagas de Carro ");
+            int vagasCarro = entrada.nextInt();
+            System.out.print("Número de vagas de Moto ");
+            int vagasMoto = entrada.nextInt();
+            System.out.print("Número de vagas de Caminhão ");
+            int vagasCaminhao = entrada.nextInt();
 
-        try {
-            PersistenciaJSON.salvarJson(estacionamento);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+
+            estacionamento = new Estacionamento(nome, vagasCarro, 1, vagasMoto, 1, vagasCaminhao, 1);
+
+            try {
+                PersistenciaJSON.salvarJson(estacionamento);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-
-        Estacionamento estacionamento1 = PersistenciaJSON.resgatarTodos();
 
         System.out.println("Estacionamento " + estacionamento.getNome());
 
@@ -93,11 +97,15 @@ public class Main {
         TipoDeVeiculo tipoDeVeiculo = TipoDeVeiculo.forInt(entrada.nextInt());
 
         Veiculo veiculo = new Veiculo(placa, marca, modelo, ano, cor, tipoDeVeiculo);
-        estacionamento.estacionar(veiculo);
         try {
-            PersistenciaJSON.salvarJson(estacionamento);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            estacionamento.estacionar(veiculo);
+            try {
+                PersistenciaJSON.salvarJson(estacionamento);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (Exception e) {
+            System.out.println(e);
         }
     }
 
@@ -133,13 +141,14 @@ public class Main {
                 System.out.println("--------------------------------");
                 System.out.println("Pagamento confirmado");
 
+                estacionamento.retirarVeiculo(retirado);
+
                 try {
                     PersistenciaJSON.salvarJson(estacionamento);
-                } catch (IOException e) {
+                    PersistenciaJSON.salvarTicket(retirado.getTicket());
+                } catch (IOException | ParseException e) {
                     throw new RuntimeException(e);
                 }
-
-                estacionamento.retirarVeiculo(retirado);
                 System.out.println("Veículo retirado do estacionamento");
                 System.out.println("--------------------------------");
             }
@@ -148,8 +157,10 @@ public class Main {
         }
     }
 
-    public static void imprimirRelatorio() {
 
+    public static void imprimirRelatorio() {
+        ArrayList<Ticket> tickets = PersistenciaJSON.resgatarTickets();
+        System.out.println(tickets);
     }
 
     public static void mostrarEstacionamento() {

@@ -19,6 +19,9 @@ public class Ticket {
     public void calcularValor() {
         float modificador = vaga.getOcupante().getTipoDeVeiculo().getModificador();
         float horas = ChronoUnit.HOURS.between(entrada, saida);
+        if (ChronoUnit.HOURS.between(entrada, saida) == 0) {
+            horas++;
+        }
         float valorPorHoraDoDia = DiaDaSemana.getDia(entrada.getDayOfWeek()).getValorPorHora();
 
         this.setValor(valorPorHoraDoDia * horas * modificador);
@@ -62,7 +65,6 @@ public class Ticket {
         sb.append("entrada=").append(entrada);
         sb.append(", saida=").append(saida);
         sb.append(", valor=").append(valor);
-        sb.append(", vaga=").append(vaga);
         sb.append('}');
         return sb.toString();
     }
