@@ -27,9 +27,6 @@ public class Main {
             System.out.print("Nome do estacionamento: ");
             String nome = entrada.nextLine();
 
-            //TODO poder mudar o modificador dos dias
-
-
             System.out.print("Número de vagas de Carro ");
             int vagasCarro = entrada.nextInt();
             System.out.print("Número de vagas de Moto ");
@@ -48,6 +45,9 @@ public class Main {
             }
         }
 
+        if (new File("precoDiario.json").exists()) {
+            PersistenciaJSON.resgatarPrecoDiario();
+        }
         if (new File("modificadorDePreco.json").exists()) {
             PersistenciaJSON.resgatarModificadoresDePreco();
         }
@@ -56,14 +56,16 @@ public class Main {
 
         boolean loop = true;
         do {
-            System.out.println("              Menu              ");
+            System.out.println("--------------------------------");
+            System.out.println("|              Menu            |");
             System.out.println("--------------------------------");
             System.out.println(" 1 - Estacionar Veículo");
             System.out.println(" 2 - Retirar Veículo");
             System.out.println(" 3 - Relatório");
             System.out.println(" 4 - Mostrar estado atual do estacionamento");
-            System.out.println(" 5 - Modificar valor por hora");
-            System.out.println(" 6 - Sair");
+            System.out.println(" 5 - Modificar valores");
+            System.out.println(" 6 - Ver valores");
+            System.out.println(" 7 - Sair");
             int escolha = entrada.nextInt();
             entrada.nextLine();
 
@@ -72,13 +74,77 @@ public class Main {
                 case 2 -> retirarDoEstacionamento();
                 case 3 -> relatorios();
                 case 4 -> mostrarEstacionamento();
-                case 5 -> modificarValorHora();
+                case 5 -> modificarValores();
+                case 6 -> verValores();
                 default -> loop = false;
             }
         } while (loop);
     }
 
+    private static void verValores() {
+        System.out.println("--------------------------------");
+        System.out.println("Visualizar valores");
+        for (DiaDaSemana value : DiaDaSemana.values()) {
+            System.out.println("Dia: " + value.name() + "  Valor: " + value.getValorPorHora());
+        }
+        for (TipoDeVeiculo value : TipoDeVeiculo.values()) {
+            System.out.println("Tipo: " + value.name() + "  Modificador: " + value.getModificador());
+        }
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void modificarValores() {
+        System.out.println("--------------------------------");
+        System.out.println(" 1 - Modificar modificador de veículo");
+        System.out.println(" 2 - Modificar valores padrão por hora");
+        System.out.println(" 3 - Sair");
+        int escolha = entrada.nextInt();
+        entrada.nextLine();
+
+        switch (escolha) {
+            case 1 -> modificarModificador();
+            case 2 -> modificarValorHora();
+            default -> {
+            }
+        }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static void modificarModificador() {
+        System.out.println("--------------------------------");
+        System.out.print("Digite o nome do veículo que deseja modificar o modificador: ");
+        String veiculo = entrada.nextLine();
+
+        TipoDeVeiculo tipoDeVeiculo = TipoDeVeiculo.valueOf(veiculo.toUpperCase());
+
+        System.out.print("Digite o valor do modificador desejado: ");
+        double valor = entrada.nextDouble();
+
+        tipoDeVeiculo.setModificador(valor);
+        try {
+            PersistenciaJSON.salvarModificador();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private static void modificarValorHora() {
+        System.out.println("--------------------------------");
         System.out.print("Digite o nome do dia da semana que deseja modificar o valor por hora: ");
         String dia = entrada.nextLine();
 
@@ -89,15 +155,21 @@ public class Main {
 
         diaDaSemana.setValorPorHora(valor);
         try {
-            PersistenciaJSON.salvarModificadorDePreco();
+            PersistenciaJSON.salvarPrecoBase();
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (ParseException e) {
             throw new RuntimeException(e);
         }
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void estacionarVeiculo() {
+        System.out.println("--------------------------------");
         //String placa, String marca, String modelo, int ano, String cor
         System.out.println("Digite as especificações do veículo");
 
@@ -134,9 +206,15 @@ public class Main {
         } catch (Exception e) {
             System.out.println(e);
         }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void retirarDoEstacionamento() {
+        System.out.println("--------------------------------");
         System.out.print("Digite a placa do veículo a ser retirada: ");
         String placa = entrada.nextLine();
 
@@ -182,6 +260,11 @@ public class Main {
         } else {
             System.out.println("Veículo não encontrado");
         }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -202,6 +285,11 @@ public class Main {
             }
         }
 
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void relatoriosFaturamento() {
@@ -287,6 +375,12 @@ public class Main {
                 }
                 System.out.println("Faturamento: " + faturamento);
             }
+        }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -379,9 +473,16 @@ public class Main {
                 System.out.println("Volume por dia: " + volume / ChronoUnit.DAYS.between(futuro, LocalDateTime.now()));
             }
         }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void mostrarEstacionamento() {
+        System.out.println("--------------------------------");
 
         String vagaVazia = """
                 |---|
@@ -408,11 +509,11 @@ public class Main {
         int count = 0;
         for (Vaga vaga : estacionamento.getVagas()) {
             if (vaga.getOcupante() != null) {
-                if (vaga.getTipo() == TipoDeVeiculo.Carro) {
+                if (vaga.getTipo() == TipoDeVeiculo.CARRO) {
                     layout[count] = vagaCarro;
-                } else if (vaga.getTipo() == TipoDeVeiculo.Moto) {
+                } else if (vaga.getTipo() == TipoDeVeiculo.MOTO) {
                     layout[count] = vagaMoto;
-                } else if (vaga.getTipo() == TipoDeVeiculo.Caminhao) {
+                } else if (vaga.getTipo() == TipoDeVeiculo.CAMINHAO) {
                     layout[count] = vagaCaminhao;
                 }
             } else {
@@ -424,12 +525,17 @@ public class Main {
         List<List<String>> fragments = Stream.of(layout)
                 .map(x -> Stream.of(x.split("\\r\\n?|\\n")).collect(Collectors.toList())).toList();
 
-        // join corresponding fragments to result lines, and join result lines
         int lines = fragments.stream().mapToInt(List::size).max().orElse(0);
         String result = IntStream.range(0, lines)
                 .mapToObj(i -> fragments.stream().map(x -> x.get(i)).collect(Collectors.joining()))
                 .collect(Collectors.joining(System.lineSeparator()));
 
         System.out.println(result);
+
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

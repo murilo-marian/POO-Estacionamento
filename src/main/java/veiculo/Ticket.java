@@ -17,7 +17,7 @@ public class Ticket {
     }
 
     public double calcularValor() {
-        float modificador = vaga.getOcupante().getTipoDeVeiculo().getModificador();
+        double modificador = vaga.getOcupante().getTipoDeVeiculo().getModificador();
         float horas = ChronoUnit.HOURS.between(entrada, saida);
         if (horas == 0) {
             horas++;

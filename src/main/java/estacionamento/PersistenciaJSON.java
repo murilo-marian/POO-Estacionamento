@@ -196,7 +196,51 @@ public class PersistenciaJSON {
         }
     }
 
-    public static void salvarModificadorDePreco() throws IOException, ParseException {
+    public static void salvarPrecoBase() throws IOException, ParseException {
+        File teste = new File("precoDiario.json");
+        JSONObject modificadores = new JSONObject();
+
+        if (teste.exists() && teste.length() != 0) {
+            JSONParser parser = new JSONParser();
+            modificadores = (JSONObject) parser.parse(new FileReader("precoDiario.json"));
+        }
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter("precoDiario.json"));
+
+        if (!teste.exists()) {
+            bw.write("");
+        }
+        for (DiaDaSemana value : DiaDaSemana.values()) {
+            modificadores.put(value.name(), value.getValorPorHora());
+        }
+
+        bw.write(modificadores.toJSONString());
+        bw.close();
+    }
+
+    public static void resgatarPrecoDiario() {
+        JSONParser parser = new JSONParser();
+
+        try {
+            File teste = new File("precoDiario.json");
+            if (!teste.exists() || teste.length() == 0) {
+                return;
+            }
+
+            FileReader fileReader = new FileReader("precoDiario.json");
+
+            JSONObject modificadores = (JSONObject) parser.parse(fileReader);
+
+            for (Object o : modificadores.keySet()) {
+                DiaDaSemana dia = DiaDaSemana.valueOf(String.valueOf(o));
+                dia.setValorPorHora((Double) modificadores.get(o));
+            }
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void salvarModificador() throws IOException, ParseException {
         File teste = new File("modificadorDePreco.json");
         JSONObject modificadores = new JSONObject();
 
@@ -210,8 +254,8 @@ public class PersistenciaJSON {
         if (!teste.exists()) {
             bw.write("");
         }
-        for (DiaDaSemana value : DiaDaSemana.values()) {
-            modificadores.put(value.name(), value.getValorPorHora());
+        for (TipoDeVeiculo value : TipoDeVeiculo.values()) {
+            modificadores.put(value.name(), value.getModificador());
         }
 
         bw.write(modificadores.toJSONString());
@@ -232,8 +276,8 @@ public class PersistenciaJSON {
             JSONObject modificadores = (JSONObject) parser.parse(fileReader);
 
             for (Object o : modificadores.keySet()) {
-                DiaDaSemana dia = DiaDaSemana.valueOf(String.valueOf(o));
-                dia.setValorPorHora((Double) modificadores.get(o));
+                TipoDeVeiculo tipoDeVeiculo = TipoDeVeiculo.valueOf(String.valueOf(o));
+                tipoDeVeiculo.setModificador((Double) modificadores.get(o));
             }
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);

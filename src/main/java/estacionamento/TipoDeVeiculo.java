@@ -1,8 +1,8 @@
 package estacionamento;
 
 public enum TipoDeVeiculo {
-    Carro(), Moto(), Caminhao();
-    private float modificador = 1;
+    CARRO(), MOTO(), CAMINHAO();
+    private double modificador = 1;
 
     TipoDeVeiculo() {
     }
@@ -11,11 +11,11 @@ public enum TipoDeVeiculo {
         return values()[id];
     }
 
-    public float getModificador() {
+    public double getModificador() {
         return modificador;
     }
 
-    public void setModificador(float modificador) {
+    public void setModificador(double modificador) {
         this.modificador = modificador;
     }
 }
