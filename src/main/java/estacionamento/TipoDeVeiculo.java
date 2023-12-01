@@ -1,20 +1,14 @@
 package estacionamento;
 
 public enum TipoDeVeiculo {
-    Carro(0), Moto(1), Caminhao(2);
-    private final int ORDEM;
+    Carro(), Moto(), Caminhao();
     private float modificador = 1;
 
-    TipoDeVeiculo(int ordem) {
-        this.ORDEM = ordem;
+    TipoDeVeiculo() {
     }
 
     public static TipoDeVeiculo forInt(int id) {
         return values()[id];
-    }
-
-    public int getORDEM() {
-        return ORDEM;
     }
 
     public float getModificador() {

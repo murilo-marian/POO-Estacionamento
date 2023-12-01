@@ -9,7 +9,7 @@ import veiculo.Veiculo;
 
 import java.io.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.*;
 
 public class PersistenciaJSON {
 
@@ -108,7 +108,7 @@ public class PersistenciaJSON {
                     veiculo = new Veiculo(placa, marca, modelo, ano, cor, tipo);
 
                     JSONObject ticketJSON = (JSONObject) veiculoJson.get("ticket");
-                    LocalDateTime entrada = null;
+                    LocalDateTime entrada;
                     LocalDateTime saida;
                     entrada = LocalDateTime.parse(ticketJSON.get("entrada").toString());
                     if (ticketJSON.get("saida") != null) {
@@ -124,6 +124,7 @@ public class PersistenciaJSON {
                 Vaga vaga = new Vaga(tipo, numero, veiculo);
 
                 if (veiculoJson.get("placa") != null) {
+                    assert ticket != null;
                     ticket.setVaga(vaga);
                     veiculo.setTicket(ticket);
                 }
@@ -141,17 +142,14 @@ public class PersistenciaJSON {
         File teste = new File("tickets.json");
         JSONArray ticketsJSON = new JSONArray();
 
-        if (teste.exists()) {
+        if (teste.exists() && teste.length() != 0) {
             JSONParser parser = new JSONParser();
-            JSONArray arrayJSON = (JSONArray) parser.parse(new FileReader("tickets.json"));
-            ticketsJSON = arrayJSON;
+            ticketsJSON = (JSONArray) parser.parse(new FileReader("tickets.json"));
         }
 
         BufferedWriter bw = new BufferedWriter(new FileWriter("tickets.json"));
 
-        System.out.println("tamanho do tickets.json" + teste.length());
         if (!teste.exists()) {
-            System.out.println("doesn't exist");
             bw.write("");
         }
 
@@ -165,16 +163,8 @@ public class PersistenciaJSON {
         ticketJSON.put("valor", ticket.getValor());
 
 
-        if (teste.length() != 0) {
-            System.out.println("appending");
-
-            ticketsJSON.add(ticketJSON);
-            bw.write(ticketJSON.toJSONString());
-        } else {
-            System.out.println("writing");
-            ticketsJSON.add(ticketJSON);
-            bw.write(ticketsJSON.toJSONString());
-        }
+        ticketsJSON.add(ticketJSON);
+        bw.write(ticketsJSON.toJSONString());
         bw.close();
     }
 
@@ -201,6 +191,50 @@ public class PersistenciaJSON {
             }
 
             return tickets;
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static void salvarModificadorDePreco() throws IOException, ParseException {
+        File teste = new File("modificadorDePreco.json");
+        JSONObject modificadores = new JSONObject();
+
+        if (teste.exists() && teste.length() != 0) {
+            JSONParser parser = new JSONParser();
+            modificadores = (JSONObject) parser.parse(new FileReader("modificadorDePreco.json"));
+        }
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter("modificadorDePreco.json"));
+
+        if (!teste.exists()) {
+            bw.write("");
+        }
+        for (DiaDaSemana value : DiaDaSemana.values()) {
+            modificadores.put(value.name(), value.getValorPorHora());
+        }
+
+        bw.write(modificadores.toJSONString());
+        bw.close();
+    }
+
+    public static void resgatarModificadoresDePreco() {
+        JSONParser parser = new JSONParser();
+
+        try {
+            File teste = new File("modificadorDePreco.json");
+            if (!teste.exists() || teste.length() == 0) {
+                return;
+            }
+
+            FileReader fileReader = new FileReader("modificadorDePreco.json");
+
+            JSONObject modificadores = (JSONObject) parser.parse(fileReader);
+
+            for (Object o : modificadores.keySet()) {
+                DiaDaSemana dia = DiaDaSemana.valueOf(String.valueOf(o));
+                dia.setValorPorHora((Double) modificadores.get(o));
+            }
         } catch (IOException | ParseException e) {
             throw new RuntimeException(e);
         }

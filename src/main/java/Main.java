@@ -1,12 +1,13 @@
-import estacionamento.Estacionamento;
-import estacionamento.PersistenciaJSON;
-import estacionamento.TipoDeVeiculo;
-import estacionamento.Vaga;
+import estacionamento.*;
 import org.json.simple.parser.ParseException;
 import veiculo.Ticket;
 import veiculo.Veiculo;
 
+import java.io.File;
 import java.io.IOException;
+import java.time.DayOfWeek;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -26,8 +27,7 @@ public class Main {
             System.out.print("Nome do estacionamento: ");
             String nome = entrada.nextLine();
 
-            //TODO fazer um loop pra caso der merda
-            //TODO calcular valor retorna -> setvalor()
+            //TODO poder mudar o modificador dos dias
 
 
             System.out.print("Número de vagas de Carro ");
@@ -36,6 +36,7 @@ public class Main {
             int vagasMoto = entrada.nextInt();
             System.out.print("Número de vagas de Caminhão ");
             int vagasCaminhao = entrada.nextInt();
+            entrada.nextLine();
 
 
             estacionamento = new Estacionamento(nome, vagasCarro, 1, vagasMoto, 1, vagasCaminhao, 1);
@@ -47,28 +48,53 @@ public class Main {
             }
         }
 
+        if (new File("modificadorDePreco.json").exists()) {
+            PersistenciaJSON.resgatarModificadoresDePreco();
+        }
+
         System.out.println("Estacionamento " + estacionamento.getNome());
 
         boolean loop = true;
         do {
             System.out.println("              Menu              ");
             System.out.println("--------------------------------");
-            System.out.println(" 0 - Estacionar Veículo");
-            System.out.println(" 1 - Retirar Veículo");
-            System.out.println(" 2 - Relatório");
-            System.out.println(" 3 - Mostrar estado atual do estacionamento");
-            System.out.println(" 4 - Sair");
+            System.out.println(" 1 - Estacionar Veículo");
+            System.out.println(" 2 - Retirar Veículo");
+            System.out.println(" 3 - Relatório");
+            System.out.println(" 4 - Mostrar estado atual do estacionamento");
+            System.out.println(" 5 - Modificar valor por hora");
+            System.out.println(" 6 - Sair");
             int escolha = entrada.nextInt();
             entrada.nextLine();
 
             switch (escolha) {
-                case 0 -> estacionarVeiculo();
-                case 1 -> retirarDoEstacionamento();
-                case 2 -> imprimirRelatorio();
-                case 3 -> mostrarEstacionamento();
+                case 1 -> estacionarVeiculo();
+                case 2 -> retirarDoEstacionamento();
+                case 3 -> relatorios();
+                case 4 -> mostrarEstacionamento();
+                case 5 -> modificarValorHora();
                 default -> loop = false;
             }
         } while (loop);
+    }
+
+    private static void modificarValorHora() {
+        System.out.print("Digite o nome do dia da semana que deseja modificar o valor por hora: ");
+        String dia = entrada.nextLine();
+
+        DiaDaSemana diaDaSemana = DiaDaSemana.getDia(DayOfWeek.valueOf(dia.toUpperCase()));
+
+        System.out.print("Digite o valor por hora desejado: ");
+        float valor = entrada.nextFloat();
+
+        diaDaSemana.setValorPorHora(valor);
+        try {
+            PersistenciaJSON.salvarModificadorDePreco();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void estacionarVeiculo() {
@@ -95,6 +121,7 @@ public class Main {
         System.out.println(" 1 - Moto");
         System.out.println(" 2 - Caminhão");
         TipoDeVeiculo tipoDeVeiculo = TipoDeVeiculo.forInt(entrada.nextInt());
+        entrada.nextLine();
 
         Veiculo veiculo = new Veiculo(placa, marca, modelo, ano, cor, tipoDeVeiculo);
         try {
@@ -158,9 +185,200 @@ public class Main {
     }
 
 
-    public static void imprimirRelatorio() {
+    public static void relatorios() {
+        System.out.println("--------------------------------");
+        System.out.println("Relatórios: ");
+        System.out.println("--------------------------------");
+        System.out.println(" 1 - Relatório de faturamento");
+        System.out.println(" 2 - Relatório de volume de estacionamentos");
+        System.out.println(" 3 - Sair");
+        int escolha = entrada.nextInt();
+        entrada.nextLine();
+
+        switch (escolha) {
+            case 1 -> relatoriosFaturamento();
+            case 2 -> relatoriosVolume();
+            default -> {
+            }
+        }
+
+    }
+
+    private static void relatoriosFaturamento() {
+        System.out.println("--------------------------------");
+        System.out.println("Relatórios de faturamento: ");
+        System.out.println("--------------------------------");
+        System.out.println(" 1 - Relatório de faturamento do mês atual");
+        System.out.println(" 2 - Relatório de faturamento dos últimos 30 dias");
+        System.out.println(" 3 - Relatório de faturamento do ano atual");
+        System.out.println(" 4 - Relatório de faturamento - Período de tempo específico");
+        System.out.println(" 5 - Relatório de faturamento - Geral");
+        System.out.println(" 6 - Sair");
+
+        int escolha = entrada.nextInt();
+        entrada.nextLine();
+
+        System.out.println("--------------------------------");
+
         ArrayList<Ticket> tickets = PersistenciaJSON.resgatarTickets();
-        System.out.println(tickets);
+        double faturamento;
+
+        switch (escolha) {
+            case 1 -> {
+                System.out.println("Faturamento do Mês Atual");
+
+                faturamento = 0;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().getDayOfMonth() == LocalDateTime.now().getDayOfMonth()) {
+                        faturamento += ticket.getValor();
+                    }
+                }
+                System.out.println("Faturamento: " + faturamento);
+            }
+            case 2 -> {
+                System.out.println("Faturamento dos últimos 30 dias");
+
+                faturamento = 0;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().isBefore(LocalDateTime.now().minus(30, ChronoUnit.DAYS))) {
+                        faturamento += ticket.getValor();
+                    }
+                }
+                System.out.println("Faturamento: " + faturamento);
+            }
+            case 3 -> {
+                System.out.println("Faturamento do ano atual");
+
+                faturamento = 0;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().getYear() == LocalDateTime.now().getYear()) {
+                        faturamento += ticket.getValor();
+                    }
+                }
+                System.out.println("Faturamento: " + faturamento);
+            }
+            case 4 -> {
+                System.out.println("Faturamento de período de tempo específico");
+
+                faturamento = 0;
+
+                System.out.print("Data de inicio: ");
+                String inicio = entrada.nextLine();
+
+                System.out.print("Data de fim: ");
+                String fim = entrada.nextLine();
+
+                LocalDateTime inicioLdt = LocalDateTime.parse(inicio);
+                LocalDateTime fimLdt = LocalDateTime.parse(fim);
+
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().isAfter(inicioLdt) && ticket.getSaida().isBefore(fimLdt)) {
+                        faturamento += ticket.getValor();
+                    }
+                }
+                System.out.println("Faturamento: " + faturamento);
+            }
+            case 5 -> {
+                System.out.println("Faturamento - Geral");
+
+                faturamento = 0;
+                for (Ticket ticket : tickets) {
+                    faturamento += ticket.getValor();
+                }
+                System.out.println("Faturamento: " + faturamento);
+            }
+        }
+    }
+
+
+    private static void relatoriosVolume() {
+        System.out.println("--------------------------------");
+        System.out.println("Relatórios de volume: ");
+        System.out.println("--------------------------------");
+        System.out.println(" 1 - Relatório de faturamento do mês atual");
+        System.out.println(" 2 - Relatório de faturamento dos últimos 30 dias");
+        System.out.println(" 3 - Relatório de faturamento do ano atual");
+        System.out.println(" 4 - Relatório de faturamento - Período de tempo específico");
+        System.out.println(" 5 - Relatório de faturamento - Geral");
+        System.out.println(" 6 - Sair");
+
+        int escolha = entrada.nextInt();
+        entrada.nextLine();
+
+        System.out.println("--------------------------------");
+
+        ArrayList<Ticket> tickets = PersistenciaJSON.resgatarTickets();
+        double volume;
+
+        switch (escolha) {
+            case 1 -> {
+                System.out.println("Volume do Mês Atual");
+
+                volume = 0;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().getDayOfMonth() == LocalDateTime.now().getDayOfMonth()) {
+                        volume ++;
+                    }
+                }
+                System.out.println("Volume por dia: " + volume / LocalDateTime.now().getDayOfMonth());
+            }
+            case 2 -> {
+                System.out.println("Volume dos últimos 30 dias");
+
+                volume = 0;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().isBefore(LocalDateTime.now().minus(30, ChronoUnit.DAYS))) {
+                        volume ++;
+                    }
+                }
+                System.out.println("Volume por dia: " + volume / 30);
+            }
+            case 3 -> {
+                System.out.println("Volume do ano atual");
+
+                volume = 0;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().getYear() == LocalDateTime.now().getYear()) {
+                        volume ++;
+                    }
+                }
+                System.out.println("Volume por dia: " + volume / LocalDateTime.now().getDayOfYear());
+            }
+            case 4 -> {
+                System.out.println("Volume de período de tempo específico");
+
+                volume = 0;
+
+                System.out.print("Data de inicio: ");
+                String inicio = entrada.nextLine();
+
+                System.out.print("Data de fim: ");
+                String fim = entrada.nextLine();
+
+                LocalDateTime inicioLdt = LocalDateTime.parse(inicio);
+                LocalDateTime fimLdt = LocalDateTime.parse(fim);
+
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().isAfter(inicioLdt) && ticket.getSaida().isBefore(fimLdt)) {
+                        volume ++;
+                    }
+                }
+                System.out.println("Volume por dia: " + volume / ChronoUnit.DAYS.between(inicioLdt, fimLdt));
+            }
+            case 5 -> {
+                System.out.println("Volume - Geral");
+
+                volume = 0;
+                LocalDateTime futuro = LocalDateTime.MAX;
+                for (Ticket ticket : tickets) {
+                    if (ticket.getSaida().isBefore(futuro)) {
+                        futuro = ticket.getSaida();
+                    }
+                    volume ++;
+                }
+                System.out.println("Volume por dia: " + volume / ChronoUnit.DAYS.between(futuro, LocalDateTime.now()));
+            }
+        }
     }
 
     public static void mostrarEstacionamento() {
@@ -183,8 +401,6 @@ public class Main {
                 |&O&|""";
 
         System.out.println("Mostrando estado atual do estacionamento: ");
-
-
 
         int vagasTotais = estacionamento.getVagasTotais();
         String[] layout = new String[vagasTotais];

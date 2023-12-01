@@ -16,15 +16,15 @@ public class Ticket {
         this.entrada = entrada;
     }
 
-    public void calcularValor() {
+    public double calcularValor() {
         float modificador = vaga.getOcupante().getTipoDeVeiculo().getModificador();
         float horas = ChronoUnit.HOURS.between(entrada, saida);
-        if (ChronoUnit.HOURS.between(entrada, saida) == 0) {
+        if (horas == 0) {
             horas++;
         }
-        float valorPorHoraDoDia = DiaDaSemana.getDia(entrada.getDayOfWeek()).getValorPorHora();
+        double valorPorHoraDoDia = DiaDaSemana.getDia(entrada.getDayOfWeek()).getValorPorHora();
 
-        this.setValor(valorPorHoraDoDia * horas * modificador);
+        return valorPorHoraDoDia * horas * modificador;
     }
 
     public LocalDateTime getEntrada() {

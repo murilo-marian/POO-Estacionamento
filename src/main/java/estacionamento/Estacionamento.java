@@ -68,8 +68,8 @@ public class Estacionamento {
     public void setarSaida(Veiculo veiculo) {
         veiculo.getTicket().setSaida(LocalDateTime.now());
         System.out.println(veiculo.getTicket());
-        veiculo.getTicket().calcularValor();
-        //TODO calcular valor retorna -> setvalor()
+        double valor = veiculo.getTicket().calcularValor();
+        veiculo.getTicket().setValor(valor);
     }
 
     public void retirarVeiculo(Veiculo retirado) {
